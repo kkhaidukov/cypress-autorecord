@@ -11,7 +11,8 @@ const isCleanMocks = cypressConfig.cleanMocks || false;
 const isForceRecord = cypressConfig.forceRecord || false;
 const recordTests = cypressConfig.recordTests || [];
 const blacklistRoutes = cypressConfig.blacklistRoutes || [];
-const replaceOrigin = cypressConfig.replaceOrigin || false;
+const urlReplaceRegex = cypressConfig.urlReplaceRegex || null;
+const urlReplaceString = cypressConfig.urlReplaceString || null;
 
 let interceptPattern = cypressConfig.interceptPattern || '*';
 const interceptPatternFragments =
@@ -87,9 +88,9 @@ module.exports = function autoRecord() {
 
       req.reply((res) => {
         let url = req.url;
-        if (replaceOrigin) {
-          const origin = new URL(url).origin;
-          url = url.replace(origin, '**');
+        if (urlReplaceRegex && urlReplaceString) {
+          const re = new RegExp(urlReplaceRegex);
+          url = url.replace(re, urlReplaceString);
         }
         const status = res.statusCode;
         const method = req.method;
