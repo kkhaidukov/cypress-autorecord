@@ -37,6 +37,9 @@ const fixturesFolder = Cypress.config('fixturesFolder').replace(/\\/g, '/');
 const fixturesFolderSubDirectory = fileName.replace(/\./, '-');
 const mocksFolder = path.join(fixturesFolder, '../mocks');
 
+const blockUnstubbedRequests = cypressConfig.blockUnstubbedRequests || false;
+const headerInterceptPattern = cypressConfig.headerInterceptPattern || null;
+
 before(function() {
   if (isCleanMocks) {
     cy.task('cleanMocks');
@@ -138,6 +141,17 @@ module.exports = function autoRecord() {
       && !isTestForceRecord
       && routesByTestId[this.currentTest.title]
     ) {
+
+      if (blockUnstubbedRequests && headerInterceptPattern) {
+        cy.intercept({
+          headers: {
+            accept: headerInterceptPattern,
+          },
+        }, {
+          statusCode: 404,
+        });
+      }
+
       // This is used to group routes by method type and url (e.g. { GET: { '/api/messages': {...} }})
       const sortedRoutes = {};
       supportedMethods.forEach((method) => {
